@@ -1,29 +1,29 @@
 from random import sample 
-from time import time
+from time import time, sleep
 from math import floor
+from copy import deepcopy
 
 
 class CPU:
     RAM = 24
     startTime = 0
-    # sortList = list()
+    sortList = list()
     def __init__(self, memory, sortList) -> None:
         self.memory = memory
-        self.sortList = sortList
+        self.sortList = deepcopy(sortList)
         
     def makeArray(self, infection):
-        nums = sample(range(0,10000*infection), (9000*infection))
-        print(len(nums))
+        multiplier = 1 if infection < 1 else infection
+        # print(multiplier)
+        nums = sample(range(0,10000*multiplier), (9000*multiplier))
         for x in range(len(nums)):
-            # print(x)
-            sortList.append(nums[x])
+            self.sortList.append(nums[x])
 
-        size = len(sortList)
+        size = len(self.sortList)
 
-        # print(sortList)
         self.startTime = time()
-        self.quickSort(sortList, 0, size - 1)
-        print("Array Sorted!")    
+        self.quickSort(self.sortList, 0, size - 1)
+        # print("Array Sorted!")    
 
     def partition(self, array, low, high):
         pivot = array[high]
@@ -48,31 +48,67 @@ class CPU:
 
 
 class CryptoJacker:
+    cryptoRam = 0
+    run = True
+    coinsMined = 0
     def __init__(self) -> None:
         pass
 
     def stealRAM(self):
-        ram = int(input("How much RAM do you want to use? "))
-        return ram
+        self.cryptoRam = input("How much RAM do you want to use? ")
+        return int(self.cryptoRam)
+    
+    def mineCoins(self, seconds):
+        coinsPerSec = float(self.cryptoRam) * 0.05
+        self.coinsMined += coinsPerSec * seconds
+        print(f"Total ShiCoins mined: {self.coinsMined}")    
+     
+
+class Detector:
+    def __init__(self) -> None:
+        pass
+
+    def detect(self, expectedTime, actualTime):
+        if actualTime != expectedTime:
+            print("\n-------------------------------------------\n" + 
+                  "  WARNING: CRYPTOJACKER RUNNING ON SYSTEM\n" + 
+                  "-------------------------------------------\n" + 
+                  f"Expected Execution Time: {expectedTime}\n" + 
+                  f"Actual Execution Time: {actualTime}")
+
+def Menu():
+    print("\n------Main Menu------\n" +  
+          "1. Run Program\n" + 
+          "2. Exit Program\n")
+    return int(input("Enter an Option: ") or 0)
 
 
-
+run = True
 sortList = list()
-cpu1 = CPU(10, sortList)
+cpu = CPU(10, sortList)
 crypto = CryptoJacker()
-run  = True
+
+cpu.makeArray(0)
+expectedTime = time() - cpu.startTime
+
 while(run):
-    print("Input -1 to stop")
-    stolen = crypto.stealRAM()
-    if stolen < 0:
-        break
+    userInput = Menu()
+    if userInput == 1: 
+        del cpu
+        cpu = CPU(10, sortList)
+        detector = Detector()
+        stolen = crypto.stealRAM()
+        infection = floor((stolen / cpu.RAM) * 250)
+        cpu.makeArray(infection)
+        totalTime = time() - cpu.startTime
+        crypto.mineCoins(totalTime)
+        formatTime = "{:.2f}".format(totalTime)
+        print(f"Exectution Time: {formatTime} sec")
+        detector.detect("{:.2f}".format(expectedTime), formatTime)
 
-    infection = floor((stolen / cpu1.RAM) * 500)
-    print(infection)
+    elif userInput == 2:
+        print("Done! Thank you")
+        run = False
 
-    cpu1.makeArray(infection)
-    time = time() - cpu1.startTime
-    formatTime = "{:.2f}".format(time)
-    print(f"Exectution Time: {formatTime} sec")
-
-print("Done! Thank you")
+    else: 
+        print("Please input a valid menu option (1 or 2)")
